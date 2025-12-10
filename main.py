@@ -10,38 +10,29 @@ def count_power_groups(stations, lines):
     Return: integer number of connected components (groups) in the network.
     """
 
-    # Build adjacency map for all stations
-    if not stations:
-        return 0
-
-    neighbors = {s: set() for s in stations}
-
-    # Add undirected edges for lines (ignore lines referencing unknown stations)
+    # Build adjacency list
+    graph = {station: [] for station in stations}
     for a, b in lines:
-        if a in neighbors and b in neighbors:
-            neighbors[a].add(b)
-            neighbors[b].add(a)
+        graph[a].append(b)
+        graph[b].append(a)
 
     visited = set()
-
-    def dfs(start):
-        stack = [start]
+    def dfs(station):
+        stack = [station]
         while stack:
             node = stack.pop()
-            if node in visited:
-                continue
-            visited.add(node)
-            for nbr in neighbors.get(node, ()):  # safe-get
-                if nbr not in visited:
-                    stack.append(nbr)
+            if node not in visited:
+                visited.add(node)
+                for neighbor in graph[node]:
+                    if neighbor not in visited:
+                        stack.append(neighbor)
 
-    groups = 0
-    for s in stations:
-        if s not in visited:
-            groups += 1
-            dfs(s)
-
-    return groups
+    count = 0
+    for station in stations:
+        if station not in visited:
+            dfs(station)
+            count += 1
+    return count
 
 
 if __name__ == "__main__":
